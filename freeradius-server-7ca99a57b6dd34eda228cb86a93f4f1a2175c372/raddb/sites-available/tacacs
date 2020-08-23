@@ -1,0 +1,255 @@
+#  -*- text -*-
+######################################################################
+#
+#	As of version 4.0.0, the server also supports the TACACS+
+#	protocol.
+#
+#	$Id$
+#
+######################################################################
+
+server tacacs {
+	#
+	#  namespace:: Needs to be "tacacs" for TACACS+ functionality.
+	#
+	namespace = tacacs
+
+	listen {
+		#
+		#  type:: The type of packet to accept.
+		#
+		#  Multiple types can be accepted by using multiple
+		#  lines of `type = ...`.
+		#
+		#  As described in RFC https://tools.ietf.org/id/draft-ietf-opsawg-tacacs-07.html#rfc.section.5,
+		#  the packet types are:
+		#
+		type = Authentication-Start
+		type = Authentication-Continue
+#		type = Authorization-Request
+#		type = Accounting-Request
+
+		#
+		#  transport:: The transport protocol.
+		#
+		#  Only `tcp` is allowed.
+		#
+		transport = tcp
+
+		#
+		#  ## Protocols
+		#
+		#  For now, only TCP is supported.
+		#
+		#  tcp { ... }:: TCP is configured here.
+		#
+		tcp {
+			#
+			#  port:: The port where we accept packets.
+			#
+			#  The port should be 49 for a production network.
+			#
+			port = 4900
+
+			#
+			#  ipaddr:: The IP address where we accept packets.
+			#
+			ipaddr = *
+
+			#
+			#  interface:: Interface to bind to.
+			#
+#			interface = eth0
+
+			#
+			#  max_packet_size:: Our max packet size. may be different from the parent.
+			#
+#			max_packet_size = 4096
+
+			#
+			#  recv_buff:: How big the kernel's receive buffer should be.
+			#
+#			recv_buff = 1048576
+
+			#
+			#  send_buff:: How big the kernel's send buffer should be.
+			#
+#			send_buff = 1048576
+
+			#
+			#  src_ipaddr:: IP we open our socket on.
+			#
+#			src_ipaddr = ""
+		}
+	}
+
+	#
+	#  ## Authentication-Start
+	#
+
+	#
+	#  ### Recv
+	#
+ 	recv Authentication-Start {
+		switch &TACACS-Authentication-Type {
+			case PAP {
+				update request {
+					&User-Name := &TACACS-User-Name
+					&User-Password := "%{string:%{TACACS-Data}}"
+					&Cleartext-Password := "%{string:%{TACACS-Data}}"
+				}
+
+				#
+				#  Read what used to be the `users` file. Since v3, this file
+				#  is located in `mods-config/files/authorize`.
+				#
+				files
+
+				#
+				#  Look in an SQL database. The schema of the database is
+				#  meant to mirror the `users` file.  For a full description
+				#  of the module behavior, please see
+				#  https://wiki.freeradius.org/modules/Rlm_sql
+				#
+				-sql
+
+				#
+				#  The `pap` module will set `TACACS-Authentication-Type := PAP` if the
+				#  packet contains a `User-Password` attribute.  The module
+				#  does this only if the `Auth-Type` attribute has not already
+				#  been set.
+				#
+				#  The `pap` module is also responsible for "normalizing" the
+				#  various kinds of "known good" passwords.
+				#  e.g. `NT-Password` may come as a 16 byte blob, or as a
+				#  32-byte hex string, or as a base-64 encoded string.  The
+				#  `pap` module will look for common variations of password
+				#  encoding, and convert them all to a normal form.
+				#
+				#  This module should be listed last, so that the other
+				#  modules get a chance to set TACACS-Authentication-Type for themselves.
+				#
+				pap
+			}
+
+			#
+			#	For now the 'chap' is only supported with RADIUS
+			#
+#			case CHAP {
+#				chap
+#			}
+		}
+
+		-sql
+	}
+
+	authenticate PAP {
+		pap
+	}
+
+	authenticate CHAP {
+		chap
+	}
+
+	#
+	#  ### Send
+	#
+	send Authentication-Start-Reply {
+#		if (&TACACS-Authentication-Status == Pass) {
+#			update reply {
+#				&TACACS-Server-Message := "Hello %{TACACS-User-Name}"
+#			}
+#		}
+	}
+
+	#
+	#  ## Authentication-Continue
+	#
+
+	#
+	#  ### Recv
+	#
+	recv Authentication-Continue {
+		#
+		#	https://tools.ietf.org/id/draft-ietf-opsawg-tacacs-07.html#rfc.section.4.3
+		#
+		"%{TACACS-Authentication-Continue-Flags}"
+		"%{TACACS-User-Message}"
+		"%{TACACS-Data}"
+	}
+
+	#
+	#  ### Send
+	#
+	send Authentication-Continue-Reply {
+#		if (&TACACS-Authentication-Status == Pass) {
+#			update reply {
+#				&TACACS-Server-Message := "Hello %{TACACS-User-Name}"
+#			}
+#		}
+	}
+
+	#
+	#	## Authorization
+	#
+
+	#
+	#	### Recv
+	#
+	recv Authorization-Request {
+		"%{TACACS-Authentication-Method}"
+		"%{TACACS-Privilege-Level}"
+		"%{TACACS-Authentication-Type}"
+		"%{TACACS-Authentication-Service}"
+		"%{TACACS-User-Name}"
+		"%{TACACS-Client-Port}"
+		"%{TACACS-Remote-Address}"
+		"%{TACACS-ArgumentList}"
+	}
+
+	#
+	#	### Send
+	#
+	send Authorization-Response {
+		update reply {
+			&TACACS-Authorization-Status := Pass-Add
+			&TACACS-Server-Message := "authorization-response-server"
+			&TACACS-Data := "authorization-response-data"
+			&TACACS-ArgumentList := "key1=var1"
+		}
+	}
+
+	#
+	#	## Accounting
+	#
+
+	#
+	#	### Recv
+	#
+ 	recv Accounting-Request {
+		"%{TACACS-Accounting-Flags}"
+		"%{TACACS-Authentication-Method}"
+		"%{TACACS-Privilege-Level}"
+		"%{TACACS-Authentication-Type}"
+		"%{TACACS-Authentication-Service}"
+		"%{TACACS-User-Name}"
+		"%{TACACS-Client-Port}"
+		"%{TACACS-Remote-Address}"
+		"%{TACACS-ArgumentList}"
+	}
+
+	#
+	#	### Send
+	#
+	send Accounting-Response {
+		update reply {
+			&TACACS-Accounting-Status := Success
+			&TACACS-Server-Message := "acct-response-server"
+			&TACACS-Data := "acct-response-data"
+		}
+	}
+
+	#
+	#	NOTE: Proxying of TACACS+ requests is NOT supported.
+	#
+}

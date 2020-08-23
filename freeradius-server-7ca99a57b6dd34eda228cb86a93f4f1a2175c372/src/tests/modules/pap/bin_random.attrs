@@ -1,0 +1,9 @@
+#
+#  Input packet
+#
+User-Name = 'test'
+
+#
+#  Expected answer
+#
+Packet-Type == Access-Accept

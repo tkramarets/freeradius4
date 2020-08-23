@@ -1,0 +1,10 @@
+#
+# PRE: update
+#
+#  A more generic "update" mechanism
+#
+update {
+	&control:Cleartext-Password := 'hello'
+}
+
+success

@@ -1,0 +1,20 @@
+#
+# PRE: update if
+#
+
+update request {
+	&Cisco-AVPair := 'foo=bar'
+	&Cisco-AVPair += 'bar=baz'
+	&Cisco-AVPair += 'baz=foo'
+}
+
+if (&Cisco-AVPair[*] =~ /bar=(.*)/) {
+	if ("%{1}" != 'baz') {
+		test_fail
+	}
+}
+else {
+	test_fail
+}
+
+success
