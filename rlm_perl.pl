@@ -2,7 +2,7 @@
 #
 #  Script purpose
 #  Cache keeper ( DB + expiration )
-#  Cache logic if not present in DB we return noop and pass authentication to imap module after successful authentication we remember user and pass to DB
+#  Cache logic if not present in DB we return noop and pass authentication to imap module after successful authentication we remember user and pass to DB via rlm_perl
 #  Cache timeout 
 #  Send Email on Failed authentication
 #
@@ -63,26 +63,26 @@ use constant {
 
 sub failed_auth {
 # email credentials
-my $smtpserver = $RAD_PERLCONF{'smtp'}->{'server'};
-my $smtpport = $RAD_PERLCONF{'smtp'}->{'port'};
-my $smtpuser   = $RAD_PERLCONF{'smtp'}->{'user'};
-my $smtppassword = $RAD_PERLCONF{'smtp'}->{'pass'};
+	my $smtpserver = $RAD_PERLCONF{'smtp'}->{'server'};
+	my $smtpport = $RAD_PERLCONF{'smtp'}->{'port'};
+	my $smtpuser   = $RAD_PERLCONF{'smtp'}->{'user'};
+	my $smtppassword = $RAD_PERLCONF{'smtp'}->{'pass'};
 
 my $transport = Email::Sender::Transport::SMTPS->new({
-host => $smtpserver,
-port => $smtpport,
-ssl  => 'starttls',
-sasl_username => $smtpuser,
-sasl_password => $smtppassword,
+	host => $smtpserver,
+	port => $smtpport,
+	ssl  => 'starttls',
+	sasl_username => $smtpuser,
+	sasl_password => $smtppassword,
 });
 
 my $email = Email::Simple->create(
-header => [
-To      => $RAD_PERLCONF{'smtp'}->{'admin_email'},
-From    => $RAD_PERLCONF{'smtp'}->{'sender_email'},
-Subject => $RAD_PERLCONF{'smtp'}->{'subject'},
+	header => [
+	To      => $RAD_PERLCONF{'smtp'}->{'admin_email'},
+	From    => $RAD_PERLCONF{'smtp'}->{'sender_email'},
+	Subject => $RAD_PERLCONF{'smtp'}->{'subject'},
 ],
-body => "Failed authentication from $RAD_REQUEST{'User-Name'} \n",
+	body => "Failed authentication from $RAD_REQUEST{'User-Name'} \n",
 );
 
 sendmail($email, { transport => $transport });
@@ -195,111 +195,92 @@ sub detach {
 #	log_request_attributes();
 }
 
-sub database {
-
-my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
-my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
-my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
-my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
-
-try {
-	my $dbInstance = DBI->connect(
-	"dbi:mysql:dbname=$dbName",
-	$dbUsername,
-	$dbPassword,
-	{ RaiseError => 1 },
-	);
-}
-	my $query = $dbInstance->prepare("SELECT * FROM cache_users WHERE username=? LIMIT 1");
-	$query->execute($username);
-
-	my $result = $query->fetchrow_arrayref();
-	$password = @$result[2];
-
-	$query->finish();
-	$dbInstance->disconnect();
-
-    if ($password == $radiusUserPassword) { 
-    return RLM_MODULE_OK;
-    }
-    else {
-    return RLM_MODULE_NOOP;
-    }
-}
-
 sub check_in_cache { 
 
-my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
-my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
-my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
-my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
+	my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
+	my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
+	my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
+	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
 
-try {
-	my $dbInstance = DBI->connect(
-	"dbi:mysql:dbname=$dbName",
-	$dbUsername,
-	$dbPassword,
-	{ RaiseError => 1 },
-	);
-}
+	try {
+		my $dbInstance = DBI->connect(
+		"dbi:mysql:dbname=$dbName",
+		$dbUsername,
+		$dbPassword,
+		{ RaiseError => 1 },
+		);
+	}
+	
 	my $query = $dbInstance->prepare("SELECT * FROM cache_users WHERE username=? LIMIT 1");
 	$query->execute($username);
 
 	my $result = $query->fetchrow_arrayref();
 	$password = @$result[2];
-
+	
 	$query->finish();
 	$dbInstance->disconnect();
-
-    if ($password == $radiusUserPassword) { 
-    return RLM_MODULE_OK;
-    }
-    else {
-    return RLM_MODULE_NOOP;
-    }
-
+	
+	if ($password == $radiusUserPassword) { 
+		return RLM_MODULE_OK;
+	}
+	else {
+		return RLM_MODULE_NOOP;
+	}
 }
 
-sub cache_expiration { 
+sub cache_expiration {
 
-my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
-my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
-my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
-my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
+	my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
+	my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
+	my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
+	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
 
-try {
-	my $dbInstance = DBI->connect(
-	"dbi:mysql:dbname=$dbName",
-	$dbUsername,
-	$dbPassword,
-	{ RaiseError => 1 },
-	);
-}
+	try {
+		my $dbInstance = DBI->connect(
+		"dbi:mysql:dbname=$dbName",
+		$dbUsername,
+		$dbPassword,
+		{ RaiseError => 1 },
+		);
+	}
+	
 	my $query = $dbInstance->prepare("SELECT * FROM cache_users WHERE cache_time  LIMIT 1");
 	$query->execute($username);
-
+	
 	my $result = $query->fetchrow_arrayref();
 	$password = @$result[2];
-
+	
 	$query->finish();
 	$dbInstance->disconnect();
-
-    if ($password == $radiusUserPassword) { 
-    return RLM_MODULE_OK;
-    }
-    else {
-    return RLM_MODULE_NOOP;
-    }
-
+	
+	if ($password == $radiusUserPassword) {
+		return RLM_MODULE_OK;
+	}
+	else {
+		return RLM_MODULE_NOOP;
+	}
 }
 
-sub insert_to_cache { 
-database();
+sub insert_to_cache {
 	log_request_attributes();
-$dbh->do("INSERT INTO cache_users VALUES (?, ?)", $RAD_REQUEST{'User-Name'}, $RAD_REQUEST{'Cleartext-Password'});
+	
+	my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
+	my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
+	my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
+	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
 
+	try {
+		my $dbInstance = DBI->connect(
+		"dbi:mysql:dbname=$dbName",
+		$dbUsername,
+		$dbPassword,
+		{ RaiseError => 1 },
+		);
+	}
+
+	$dbh->do("INSERT INTO cache_users VALUES (?, ?)", $RAD_REQUEST{'User-Name'}, $RAD_REQUEST{'Cleartext-Password'});
+	
 	return RLM_MODULE_OK;
-
 }
 
 
