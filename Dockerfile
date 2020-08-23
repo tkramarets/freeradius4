@@ -2,7 +2,7 @@ ARG from=ubuntu:18.04
 FROM ${from} as build
 
 RUN apt-get update
-RUN apt-get install -y devscripts equivs git quilt gcc doxygen graphviz libjson-perl libssl-dev libtalloc-dev libkqueue-dev
+RUN apt-get install -y devscripts equivs git quilt gcc doxygen graphviz libjson-perl libssl-dev libtalloc-dev libkqueue-dev libmysqlclient-dev
 
 RUN mkdir -p /usr/local/src/repositories
 WORKDIR /usr/local/src/repositories
@@ -27,15 +27,8 @@ ENV SQL_PORT=3306
 ENV SQL_USER=radius
 ENV SQL_PASS=radpass
 ENV SQL_DB_NAME=radius
-ENV SQL_DRIVER=rlm_sql_mysql
+ENV SQL_DRIVER=mysql
 ENV RADIUS_KEY=testing123
-
-### clients.conf trusted network
-ENV RAD_CLIENTS=10.0.0.0/24
-
-# enable or disable debug mode
-ENV RAD_DEBUG=no
-
 
 ### Expired cache will be deleted in 
 ### 30 days =  2592000 seconds
@@ -48,11 +41,12 @@ ENV IMAP_TIMEOUT=5s
 ENV IMAP_URI=imap://localhost:993
 
 ###
-ENV IMAP_PROTO=tls
-ENV IMAP_CERT=
-ENV IMAP_CA=
-ENV IMAP_KEY=
-ENV IMAP_KEY_PASS=
+#ENV IMAP_PROTO=tls
+#ENV IMAP_CERT=
+#ENV IMAP_CA=
+#ENV IMAP_KEY=
+#ENV IMAP_KEY_PASS=
+ENV FR_LIBRARY_PATH=/usr/lib/freeradius
 
 RUN apt-get update \
     && apt-get install -y /tmp/*.deb \
@@ -62,6 +56,7 @@ RUN apt-get update \
     && ln -s /etc/freeradius /etc/raddb
 
 RUN rm /etc/freeradius/mods-enabled/soh
+COPY raddb /etc/freeradius
 COPY default /etc/freeradius/sites-enabled/default
 COPY mods-available/* /etc/freeradius/mods-enabled/
 
@@ -69,4 +64,4 @@ COPY docker-entrypoint.sh /
 VOLUME ["/etc/freeradius/"]
 EXPOSE 1812/udp 1813/udp
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["freeradius"]
+CMD ["env FR_LIBRARY_PATH=/usr/lib/freeradius freeradius"]

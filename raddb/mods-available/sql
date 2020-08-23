@@ -28,7 +28,7 @@ sql {
 	#    * rlm_sql_sqlite
 	#    * rlm_sql_null (log queries to disk)
 	#
-	driver = "rlm_sql_mysql"
+	driver = "$ENV{SQL_DRIVER}"
 
 #
 #	Several drivers accept specific options, to set them, a
@@ -84,7 +84,7 @@ sql {
 	#
 	# If you're using rlm_sql_null, then it should be the type of
 	# database the logged queries are going to be executed against.
-	dialect = "mysql"
+	dialect = "sqlite"
 
 	# Connection info:
 	#
@@ -188,7 +188,7 @@ sql {
 		#  connections during instantiation it will exit.
 		#  Set to 0 to allow the server to start without the
 		#  database being available.
-		start = 1
+		start = 0
 
 		#  Minimum number of connections to keep open
 		min = 1
@@ -204,7 +204,7 @@ sql {
 		#
 		#  Setting 'max' to MORE than the number of threads means
 		#  that there are more connections than necessary.
-		max = 200
+		max = 2000
 
 		#  Spare connections to be left idle
 		#
