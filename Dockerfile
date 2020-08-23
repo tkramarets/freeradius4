@@ -2,7 +2,7 @@ ARG from=ubuntu:18.04
 FROM ${from} as build
 
 RUN apt-get update
-RUN apt-get install -y devscripts equivs git quilt gcc doxygen graphviz libjson-perl libssl-dev libtalloc-dev libkqueue-dev libmysqlclient-dev
+RUN apt-get install -y devscripts equivs git quilt gcc doxygen graphviz libjson-perl libssl-dev libtalloc-dev libkqueue-dev libmysqlclient-dev make build-essential git automake autoconf libtool ca-certificates libhiredis-dev libpam-dev pandoc libjson-c-dev
 
 RUN mkdir -p /usr/local/src/repositories
 WORKDIR /usr/local/src/repositories
