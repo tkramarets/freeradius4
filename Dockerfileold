@@ -3,7 +3,7 @@ FROM ${from} as build
 
 RUN apt-get update
 RUN apt-cache search mysql | more 
-RUN apt-get install -y devscripts equivs git quilt gcc doxygen graphviz libjson-perl libssl-dev libtalloc-dev libkqueue-dev libmysqlclient-dev make build-essential git automake autoconf libtool ca-certificates libhiredis-dev libpam-dev pandoc libjson-c-dev  default-libmysqlclient-dev
+RUN apt-get install -y devscripts equivs git quilt gcc doxygen graphviz libjson-perl libssl-dev libtalloc-dev libkqueue-dev libmysqlclient-dev make build-essential git automake autoconf libtool ca-certificates libhiredis-dev libpam-dev pandoc libjson-c-dev libmysqld-dev libmysqld-dev default-libmysqlclient-dev default-libmysqld-dev
 
 RUN mkdir -p /usr/local/src/repositories
 WORKDIR /usr/local/src/repositories
@@ -54,10 +54,10 @@ RUN apt-get update \
     && ln -s /etc/freeradius /etc/raddb
 
 RUN rm /etc/freeradius/mods-enabled/soh
-#COPY raddb /etc/freeradius
-COPY default /etc/freeradius/sites-enabled/default
+COPY raddb /etc/freeradius
+
 COPY docker-entrypoint.sh /
 VOLUME ["/etc/freeradius/"]
 EXPOSE 1812/udp 1813/udp
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["freeradius"]
+CMD ["env FR_LIBRARY_PATH=/usr/lib/freeradius freeradius"]
