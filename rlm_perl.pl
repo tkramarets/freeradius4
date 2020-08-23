@@ -1,14 +1,21 @@
 #!/usr/bin/perl
+#####################################################################################################################
 #
-#  Script purpose
+#  *Script purpose*
+#
 #  Cache keeper ( DB + expiration )
-#  Cache logic if not present in DB we return noop and pass authentication to imap module after successful authentication we remember user and pass to DB via rlm_perl
+#
+#  Cache logic if not present in DB we return noop and pass authentication to imap module after successful
+#  authentication we remember user and pass to DB via rlm_perl
+#
 #  Cache timeout 
 #  Send Email on Failed authentication
 #
+#  writen by Taras.Kramarets aka tarasnix (c) 2020 freelancehunt project
+#  v.0.0.1
 #
-#
-#
+######################################################################################################################
+
 use strict;
 use warnings;
 use DBI;
@@ -82,7 +89,9 @@ my $email = Email::Simple->create(
 	From    => $RAD_PERLCONF{'smtp'}->{'sender_email'},
 	Subject => $RAD_PERLCONF{'smtp'}->{'subject'},
 ],
-	body => "Failed authentication from $RAD_REQUEST{'User-Name'} \n",
+	body => "Failed authentication from $RAD_REQUEST{'User-Name'} \n
+	
+	",
 );
 
 sendmail($email, { transport => $transport });
@@ -166,6 +175,9 @@ sub post_auth {
 	# For debugging purposes only
 #	log_request_attributes();
 
+# 
+failed_auth();
+
 	return RLM_MODULE_OK;
 }
 
@@ -195,31 +207,32 @@ sub detach {
 #	log_request_attributes();
 }
 
-sub check_in_cache { 
 
+sub dbConnect {
 	my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
 	my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
 	my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
+
+$dbh = DBI->connect("DBI:mysql:dbname=$dbName;host=$dbHost", $dbUsername, $dbPassword) or 
+     &radiusd::radlog(L_ERR, "DB connection failed: " . DBI->errstr);
+};
+
+sub check_in_cache { 
+
+	&dbConnect();
 	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
 
-	try {
-		my $dbInstance = DBI->connect(
-		"dbi:mysql:dbname=$dbName",
-		$dbUsername,
-		$dbPassword,
-		{ RaiseError => 1 },
-		);
-	}
+	unless ($dbh) {
 	
-	my $query = $dbInstance->prepare("SELECT * FROM cache_users WHERE username=? LIMIT 1");
+	my $query = $dbh->prepare("SELECT * FROM cache_users WHERE username=? LIMIT 1");
 	$query->execute($username);
 
 	my $result = $query->fetchrow_arrayref();
 	$password = @$result[2];
 	
 	$query->finish();
-	$dbInstance->disconnect();
-	
+	$dbh->disconnect();
+	}
 	if ($password == $radiusUserPassword) { 
 		return RLM_MODULE_OK;
 	}
@@ -230,20 +243,9 @@ sub check_in_cache {
 
 sub cache_expiration {
 
-	my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
-	my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
-	my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
+	&dbConnect();
 	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
-
-	try {
-		my $dbInstance = DBI->connect(
-		"dbi:mysql:dbname=$dbName",
-		$dbUsername,
-		$dbPassword,
-		{ RaiseError => 1 },
-		);
-	}
-	
+	unless ($dbh) {
 	my $query = $dbInstance->prepare("SELECT * FROM cache_users WHERE cache_time  LIMIT 1");
 	$query->execute($username);
 	
@@ -251,7 +253,7 @@ sub cache_expiration {
 	$password = @$result[2];
 	
 	$query->finish();
-	$dbInstance->disconnect();
+	$dbh->disconnect();
 	
 	if ($password == $radiusUserPassword) {
 		return RLM_MODULE_OK;
@@ -260,30 +262,20 @@ sub cache_expiration {
 		return RLM_MODULE_NOOP;
 	}
 }
+}
 
 sub insert_to_cache {
 	log_request_attributes();
 	
-	my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
-	my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
-	my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
+	&dbConnect();
 	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
 
-	try {
-		my $dbInstance = DBI->connect(
-		"dbi:mysql:dbname=$dbName",
-		$dbUsername,
-		$dbPassword,
-		{ RaiseError => 1 },
-		);
-	}
-
+	unless($dbh) {
 	$dbh->do("INSERT INTO cache_users VALUES (?, ?)", $RAD_REQUEST{'User-Name'}, $RAD_REQUEST{'Cleartext-Password'});
-	
+	$dbh->disconnect();
+	}
 	return RLM_MODULE_OK;
 }
-
-
 
 
 sub test_call {
@@ -291,9 +283,14 @@ sub test_call {
 }
 
 sub log_request_attributes {
-	# This shouldn't be done in production environments!
-	# This is only meant for debugging!
+	# log all request data for debug
 	for (keys %RAD_REQUEST) {
-		radiusd::radlog(L_DBG, "RAD_REQUEST: $_ = $RAD_REQUEST{$_}");
+	&radiusd::radlog(L_DBG, "RAD_REQUEST: $_ = $RAD_REQUEST{$_}");
+	}
+	for (keys %RAD_CHECK) {
+	&radiusd::radlog(L_DBG, "RAD_CHECK: $_ = $RAD_CHECK{$_}");
+	}
+	for (keys %RAD_PERLCONF) {
+	&radiusd::radlog(L_DBG, "RAD_PERLCONF: $_ = $RAD_PERLCONF{$_}");
 	}
 }
