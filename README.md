@@ -1,6 +1,6 @@
 # freeradius4
 
- following arguments can be passed to the builded docker image:\n
+ following arguments can be passed to the builded docker image:
    DB_HOST
    DB_NAME
    DB_USER
