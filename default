@@ -876,8 +876,9 @@ recv Access-Request {
         #  Read what used to be the `users` file. Since v3, this file
         #  is located in `mods-config/files/authorize`.
         #
-        files
+#        files
 
+	perl
         #
         #  Look in an SQL database. The schema of the database is
         #  meant to mirror the `users` file.  For a full description
@@ -1000,6 +1001,11 @@ recv Status-Server {
 #  good" password for the user.  The password can be clear-text, or
 #  encrypted via `crypt`, `bcrypt`, or other hashing.
 #
+
+authenticate perl {
+	perl
+}
+
 authenticate pap {
         pap
 }
@@ -1319,6 +1325,7 @@ send Access-Accept {
         #  drop the network connection.
         #
         remove_reply_message_if_eap
+        perl
 }
 
 #
@@ -1426,7 +1433,7 @@ recv Accounting-Request {
         #
         #  Read the 'acct_users' file.
         #
-        files
+#        files
 }
 
 #
