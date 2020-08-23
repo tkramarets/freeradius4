@@ -102,7 +102,7 @@ sendmail($email, { transport => $transport });
 # Function to handle authorize
 sub authorize {
 	# For debugging purposes only
-#	log_request_attributes();
+	log_request_attributes();
 
 	# Here's where your authorization code comes
 	# You can call another function from here:
@@ -114,7 +114,7 @@ sub authorize {
 
 sub authenticate {
 	# For debugging purposes only
-#	log_request_attributes();
+	log_request_attributes();
 
 	if ($RAD_REQUEST{'User-Name'} =~ /^baduser/i) {
 		# Reject user and tell him why
@@ -136,7 +136,7 @@ sub authenticate {
 # Function to handle preacct
 sub preacct {
 	# For debugging purposes only
-#	log_request_attributes();
+	log_request_attributes();
 
 	return RLM_MODULE_OK;
 }
@@ -145,10 +145,10 @@ sub preacct {
 # Function to handle accounting
 sub accounting {
 	# For debugging purposes only
-#	log_request_attributes();
+	log_request_attributes();
 
 	# You can call another subroutine from here
-	test_call();
+	&test_call();
 
 	return RLM_MODULE_OK;
 }
@@ -157,7 +157,7 @@ sub accounting {
 # Function to handle pre_proxy
 sub pre_proxy {
 	# For debugging purposes only
-#	log_request_attributes();
+	log_request_attributes();
 
 	return RLM_MODULE_OK;
 }
@@ -165,19 +165,15 @@ sub pre_proxy {
 # Function to handle post_proxy
 sub post_proxy {
 	# For debugging purposes only
-#	log_request_attributes();
+	log_request_attributes();
 
 	return RLM_MODULE_OK;
 }
 
 # Function to handle post_auth
 sub post_auth {
-	# For debugging purposes only
-#	log_request_attributes();
-
-# 
-failed_auth();
-
+	log_request_attributes();
+		&failed_auth();
 	return RLM_MODULE_OK;
 }
 
@@ -209,58 +205,69 @@ sub detach {
 
 
 sub dbConnect {
+	my $dbHost		= $RAD_PERLCONF{'db'}->{'host'};
 	my $dbName 		= $RAD_PERLCONF{'db'}->{'name'};
 	my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
 	my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
 
-$dbh = DBI->connect("DBI:mysql:dbname=$dbName;host=$dbHost", $dbUsername, $dbPassword) or 
-     &radiusd::radlog(L_ERR, "DB connection failed: " . DBI->errstr);
+$dbh = DBI->connect("DBI:mysql:dbname=$dbName;host=$dbHost", $dbUsername, $dbPassword) or &radiusd::radlog(L_ERR, "DB connection failed: " . DBI->errstr);
 };
 
 sub check_in_cache { 
 
 	&dbConnect();
+	
 	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
 
 	unless ($dbh) {
 	
 	my $query = $dbh->prepare("SELECT * FROM cache_users WHERE username=? LIMIT 1");
+	
 	$query->execute($username);
 
 	my $result = $query->fetchrow_arrayref();
+	
 	$password = @$result[2];
 	
 	$query->finish();
+	
 	$dbh->disconnect();
+	
 	}
+	
 	if ($password == $radiusUserPassword) { 
+	
 		return RLM_MODULE_OK;
+	
 	}
+	
 	else {
+	
 		return RLM_MODULE_NOOP;
+	
 	}
 }
 
 sub cache_expiration {
-
+	log_request_attributes();
+	
 	&dbConnect();
-	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
+	
 	unless ($dbh) {
+	
 	my $query = $dbInstance->prepare("SELECT * FROM cache_users WHERE cache_time  LIMIT 1");
+	
 	$query->execute($username);
 	
 	my $result = $query->fetchrow_arrayref();
+	
 	$password = @$result[2];
 	
 	$query->finish();
+	
 	$dbh->disconnect();
 	
-	if ($password == $radiusUserPassword) {
-		return RLM_MODULE_OK;
-	}
-	else {
-		return RLM_MODULE_NOOP;
-	}
+	return RLM_MODULE_NOOP;
 }
 }
 

@@ -24,16 +24,18 @@ FROM ${from}
 COPY --from=build /usr/local/src/repositories/*.deb /tmp/
 
 
-
-ENV SQL_HOST=localhost
-ENV SQL_PORT=3306
-ENV SQL_USER=radius
-ENV SQL_PASS=radpass
-ENV SQL_DB_NAME=radius
-ENV SQL_DRIVER=mysql
-ENV RADIUS_KEY=testing123
-
-
+# Connection to the database with cache
+#
+# Database host
+ENV DB_HOST=localhost
+# Database port
+ENV DB_PORT=3306
+# Database user
+ENV DB_USER=radius
+# Database password
+ENV DB_PASS=radpass
+# Database name
+ENV DB_NAME=radius
 
 
 # EMAIL SMTP SETTINGS
@@ -54,7 +56,6 @@ ENV SMTP_SENDER_EMAIL=admin@gmail.com
 ENV SMTP_SUBJECT="Radius: Failed login attempt"
 
 
-
 ### Expired cache will be deleted in 
 ### 30 days =  2592000 seconds
 ENV CACHE_TIME=2592000
@@ -71,6 +72,7 @@ ENV IMAP_URI=imap://localhost:993
 #ENV IMAP_CA=
 #ENV IMAP_KEY=
 #ENV IMAP_KEY_PASS=
+
 ENV FR_LIBRARY_PATH=/usr/lib/freeradius
 
 RUN apt-get update \
@@ -80,6 +82,8 @@ RUN apt-get update \
 RUN rm /etc/freeradius/mods-enabled/soh
 #COPY raddb /etc/freeradius
 COPY default /etc/freeradius/sites-enabled/default
+COPY perl  /etc/freeradius/mods-enabled/perl
+COPY rlm_perl.pl /etc/freeradius/mods-config/perl/rlm_perl.pl
 COPY docker-entrypoint.sh /
 VOLUME ["/etc/freeradius/"]
 EXPOSE 1812/udp 1813/udp

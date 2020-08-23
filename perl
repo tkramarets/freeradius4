@@ -2,6 +2,7 @@ perl {
 	filename = ${modconfdir}/${.:instance}/rlm_perl.pl
 	config {
 		db {
+			host = $ENV{DB_HOST}
 			name = $ENV{DB_NAME}
 			user = $ENV{DB_USER}
 			password = $ENV{DB_PASS}
