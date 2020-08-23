@@ -11,7 +11,7 @@ fi
 # check for the expected command
 if [ "$1" = 'freeradius' ]; then
     shift
-    exec freeradius -f "$@"
+    exec freeradius -f "$@" -XXX
 fi
 
 # many people are likely to call "radiusd" as well, so allow that
