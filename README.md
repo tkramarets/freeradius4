@@ -1,20 +1,20 @@
 # freeradius4
 
  following arguments can be passed to the builded docker image:\n
-   DB_HOST\n
-   DB_NAME\n
-   DB_USER\n
-   DB_PASS\n
-   SMTP_SERVER\n
-   SMTP_PORT\n
-   SMTP_USER\n
-   SMTP_PASS\n
-   SMTP_ADMIN_EMAIL\n
-   SMTP_SENDER_EMAIL\n
-   SMTP_SUBJECT\n
-   CACHE_TIME\n
-   IMAP_TIMEOUT\n
-   IMAP_URI\n
+   DB_HOST
+   DB_NAME
+   DB_USER
+   DB_PASS
+   SMTP_SERVER
+   SMTP_PORT
+   SMTP_USER
+   SMTP_PASS
+   SMTP_ADMIN_EMAIL
+   SMTP_SENDER_EMAIL
+   SMTP_SUBJECT
+   CACHE_TIME
+   IMAP_TIMEOUT
+   IMAP_URI
    
    you can pass those variables via docker run -e SMTP_SERVER=google.com or set them inside Dockerfile
    
