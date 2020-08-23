@@ -1,6 +1,8 @@
 # freeradius4
 
 for now  freeradius4 sources has broken module rlm_test which broke all logic
+
+
 CC src/modules/rlm_test/rlm_test.c
 src/modules/rlm_test/rlm_test.c: In function 'mod_bootstrap':
 src/modules/rlm_test/rlm_test.c:266:46: error: macro "talloc_foreach" passed 3 arguments, but takes just 2
