@@ -23,23 +23,23 @@ use Email::Sender::Simple qw(sendmail);
 use Email::Sender::Transport::SMTPS();
 use Email::Simple ();
 use Email::Simple::Creator ();
-use Data::Dumper;
-
 
 
 # Bring the global hashes into the package scope
-our (%RAD_REQUEST, %RAD_REPLY, %RAD_CONFIG, %RAD_STATE);
+#our (%RAD_REQUEST, %RAD_REPLY, %RAD_CONFIG, %RAD_STATE);
 
 # This is hash wich hold original request from radius
-#my %RAD_REQUEST;
+my %RAD_REQUEST;
 # In this hash you add values that will be returned to NAS.
-#my %RAD_REPLY;
+my %RAD_REPLY;
 #This is for config items (was %RAD_CHECK in earlier versions)
-#my %RAD_CONFIG;
+my %RAD_CONFIG;
 # This is the session-sate
-#my %RAD_STATE;
+my %RAD_STATE;
 # This is configuration items from "config" perl module configuration section
-#my %RAD_PERLCONF;
+my %RAD_PERLCONF;
+
+my %RAD_CHECK;
 
 use constant {
 	RLM_MODULE_REJECT   => 0, # immediately reject the request
@@ -210,7 +210,7 @@ sub dbConnect {
 	my $dbUsername	= $RAD_PERLCONF{'db'}->{'user'};
 	my $dbPassword 	= $RAD_PERLCONF{'db'}->{'password'};
 
-$dbh = DBI->connect("DBI:mysql:dbname=$dbName;host=$dbHost", $dbUsername, $dbPassword) or &radiusd::radlog(L_ERR, "DB connection failed: " . DBI->errstr);
+my $dbh = DBI->connect("DBI:mysql:dbname=$dbName;host=$dbHost", $dbUsername, $dbPassword) or &radiusd::radlog(L_ERR, "DB connection failed: " . DBI->errstr);
 };
 
 sub check_in_cache { 
@@ -218,8 +218,8 @@ sub check_in_cache {
 	&dbConnect();
 	
 	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
-
-	unless ($dbh) {
+        my $username = $RAD_REQUEST{'Username'};
+	unless (my $dbh) {
 	
 	my $query = $dbh->prepare("SELECT * FROM cache_users WHERE username=? LIMIT 1");
 	
@@ -227,13 +227,12 @@ sub check_in_cache {
 
 	my $result = $query->fetchrow_arrayref();
 	
-	$password = @$result[2];
+	my $password = @$result[2];
 	
 	$query->finish();
 	
 	$dbh->disconnect();
 	
-	}
 	
 	if ($password == $radiusUserPassword) { 
 	
@@ -247,21 +246,23 @@ sub check_in_cache {
 	
 	}
 }
+}
 
 sub cache_expiration {
 	log_request_attributes();
 	
 	&dbConnect();
+        my $username = $RAD_REQUEST{'Username'};
 	
-	unless ($dbh) {
+	unless (my $dbh) {
 	
-	my $query = $dbInstance->prepare("SELECT * FROM cache_users WHERE cache_time  LIMIT 1");
+	my $query = $dbh->prepare("SELECT * FROM cache_users WHERE cache_time  LIMIT 1");
 	
 	$query->execute($username);
 	
 	my $result = $query->fetchrow_arrayref();
 	
-	$password = @$result[2];
+	my $password = @$result[2];
 	
 	$query->finish();
 	
@@ -275,9 +276,7 @@ sub insert_to_cache {
 	log_request_attributes();
 	
 	&dbConnect();
-	my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
-
-	unless($dbh) {
+	unless(my $dbh) {
 	$dbh->do("INSERT INTO cache_users VALUES (?, ?)", $RAD_REQUEST{'User-Name'}, $RAD_REQUEST{'Cleartext-Password'});
 	$dbh->disconnect();
 	}
