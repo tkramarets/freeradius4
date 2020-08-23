@@ -2,15 +2,16 @@ ARG from=ubuntu:18.04
 FROM ${from} as build
 
 RUN apt-get update
+RUN apt-cache search mysql 
 RUN apt-get install -y devscripts equivs git quilt gcc doxygen graphviz libjson-perl libssl-dev libtalloc-dev libkqueue-dev libmysqlclient-dev make build-essential git automake autoconf libtool ca-certificates libhiredis-dev libpam-dev pandoc libjson-c-dev
 
 RUN mkdir -p /usr/local/src/repositories
 WORKDIR /usr/local/src/repositories
 
-ARG source=https://github.com/FreeRADIUS/freeradius-server.git
-
-RUN git clone ${source}
-WORKDIR freeradius-server
+#ARG source=https://github.com/FreeRADIUS/freeradius-server.git
+COPY freeradius-server-7ca99a57b6dd34eda228cb86a93f4f1a2175c372 freeradius-server-7ca99a57b6dd34eda228cb86a93f4f1a2175c372
+#RUN git clone ${source}
+WORKDIR freeradius-server-7ca99a57b6dd34eda228cb86a93f4f1a2175c372
 
 RUN if [ -e ./debian/control.in ]; then \
         debian/rules debian/control; \
