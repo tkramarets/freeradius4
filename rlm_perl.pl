@@ -116,20 +116,8 @@ sub authenticate {
 	# For debugging purposes only
 	log_request_attributes();
 
-	if ($RAD_REQUEST{'User-Name'} =~ /^baduser/i) {
-		# Reject user and tell him why
-		$RAD_REPLY{'Reply-Message'} = "Denied access by rlm_perl function";
-		return RLM_MODULE_REJECT;
-	} else {
-		# Accept user and set some attribute
-		if (&radiusd::xlat("%{client:group}") eq 'UltraAllInclusive') {
-			# User called from NAS with unlim plan set, set higher limits
-			$RAD_REPLY{'h323-credit-amount'} = "1000000";
-		} else {
-			$RAD_REPLY{'h323-credit-amount'} = "100";
-		}
-		return RLM_MODULE_OK;
-	}
+	&check_in_cache();
+
 }
 
 
@@ -202,6 +190,7 @@ sub detach {
 	# For debugging purposes only
 #	log_request_attributes();
 }
+
 
 
 sub dbConnect {

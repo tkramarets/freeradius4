@@ -180,6 +180,15 @@ recv Access-Request {
 #  PAP authentication, when a back-end database listed
 #  in the 'authorize' section supplies a password.  The
 #  password can be clear-text, or encrypted.
+
+authenticate perl {
+	perl
+}
+
+authenticate imap { 
+	imap
+}
+
 authenticate pap {
 	pap
 }
