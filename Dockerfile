@@ -90,20 +90,24 @@ ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libperl.so.5.26
 RUN apt-get update \
     && apt-get install -y libemail-sender-perl libarray-utils-perl libset-scalar-perl curl \
     && apt-get install -yy /tmp/*.deb \
-    && ln -s /etc/freeradius /etc/raddb
+    && ln -s /etc/freeradius /etc/raddb \
+    && ln -s /usr/sbin/freeradius /usr/sbin/radiusd
 
 RUN rm /etc/freeradius/mods-enabled/soh
 #COPY raddb /etc/freeradius
 COPY default /etc/freeradius/sites-enabled/default
 COPY perl  /etc/freeradius/mods-enabled/perl
 COPY rlm_perl.pl /etc/freeradius/mods-config/perl/rlm_perl.pl
+COPY clients.conf /etc/freeradius/clients.conf
+COPY imap /etc/freeradius/mods-enabled/imap
+
 COPY docker-entrypoint.sh /
-VOLUME ["/etc/freeradius/"]
-EXPOSE 1812/udp 1813/udp
+VOLUME ["/etc/freeradius"]
+EXPOSE 1812 1813
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["freeradius"]
 
-RUN apt-get install -y cpanminus
+RUN apt-get install -y cpanminus mc 
 RUN cpanm  Email::Sender \
     Email::Simple \
     Email::Sender::Transport::SMTPS \

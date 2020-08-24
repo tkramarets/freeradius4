@@ -877,7 +877,6 @@ recv Access-Request {
         #  is located in `mods-config/files/authorize`.
         #
 #        files
-
 	perl
         #
         #  Look in an SQL database. The schema of the database is
@@ -1002,9 +1001,11 @@ recv Status-Server {
 #  encrypted via `crypt`, `bcrypt`, or other hashing.
 #
 
+
 authenticate perl {
 	perl
 }
+
 
 authenticate pap {
         pap
