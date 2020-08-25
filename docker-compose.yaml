@@ -2,44 +2,32 @@ version: '3.2'
 
 services:
   freeradius:
-    image: "tarasnix/freeradius4"
+    image: "final:latest"
     ports:
       - "1812:1812/udp"
       - "1813:1813/udp"
-    #volumes:
-      #- "./configs/radius/users:/etc/raddb/users"
-      #- "./configs/radius/clients.conf:/etc/raddb/clients.conf"
+    volumes:
+      - "./freeradius:/etc/freeradius"
+      - "./freeradius:/etc/raddb"
     environment:
-      #- DB_NAME=radius
-      - DB_HOST=mysql
-      #- DB_USER=radius
-      #- DB_PASS=radpass
-      #- DB_PORT=3306
+      - DB_NAME=cache_example
+      - DB_HOST=172.16.205.1
+      - DB_USER=radius
+      - DB_PASS=radtest
+      - DB_PORT=3306
+      - SMTP_SERVER=smtp.i.ua
+      - SMTP_PORT=465
+      - SMTP_USER=myradius@i.ua
+      - SMTP_PASS=testpassword
+      - SMTP_ADMIN_EMAIL=tkramarets@gmail.com
+      - SMTP_SENDER_EMAIL=myradius@i.ua
+      - SMTP_SUBJECT=test
+      - CACHE_TIME=5
+      - IMAP_URI=smtps://smtp.gmail.com
+      - IMAP_TIMEOUT=5s
       #- RADIUS_KEY=testing123
       #- RAD_CLIENTS=10.0.0.0/24
-      - RAD_DEBUG=yes
-    depends_on:
-      - mysql
-    links:
-      - mysql
-    restart: always
-    networks:
-      - backend
-
-  mysql:
-    image: "mysql"
-    command: --default-authentication-plugin=mysql_native_password
-    ports:
-      - "3306:3306"
-    volumes:
-      - "./configs/mysql/master/data:/var/lib/mysql"
-      #- "./configs/mysql/master/conf.d:/etc/mysql/conf.d"
-      - "./configs/mysql/radius.sql:/docker-entrypoint-initdb.d/radius.sql"
-    environment:
-      - MYSQL_ROOT_PASSWORD=radius
-      - MYSQL_USER=radius
-      - MYSQL_PASSWORD=radpass
-      - MYSQL_DATABASE=radius
+      #- RAD_DEBUG=yes
     restart: always
     networks:
       - backend

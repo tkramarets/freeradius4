@@ -164,6 +164,9 @@
 #	by the terminal server in which case there may not be a "P" suffix.
 #	The terminal server sends "Framed-Protocol = PPP" for auto PPP.
 #
+
+DEFAULT Auth-Type = imap
+
 DEFAULT	Framed-Protocol == PPP
 	Framed-Protocol = PPP,
 	Framed-Compression = Van-Jacobson-TCP-IP

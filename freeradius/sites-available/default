@@ -455,7 +455,7 @@ server default {
                                 #
                                 #  allowed values: {no, yes}
                                 #
-                                auth = no
+                                auth = yes
 
                                 #
                                 #  auth_goodpass:: Log "good"
@@ -473,7 +473,7 @@ server default {
                                 #
                                 #  allowed values: {no, yes}
                                 #
-                                auth_badpass = no
+                                auth_badpass = yes
 
                                 #
                                 #  msg_goodpass::
@@ -878,7 +878,6 @@ recv Access-Request {
         #
 #        files
 
-	perl
         #
         #  Look in an SQL database. The schema of the database is
         #  meant to mirror the `users` file.  For a full description
@@ -1002,14 +1001,14 @@ recv Status-Server {
 #  encrypted via `crypt`, `bcrypt`, or other hashing.
 #
 
+authenticate imap {
+        imap
+}
 
 authenticate perl {
-	perl
+        perl
 }
 
-authenticate imap { 
-	imap
-}
 
 authenticate pap {
         pap
@@ -1197,6 +1196,7 @@ send Access-Accept {
         #  For EAP, ensure that the Access-Accept contains a User-Name
         #  attribute.
         #
+        perl
         eap
 
         #
@@ -1359,6 +1359,7 @@ send Access-Reject {
         #  Insert an EAP-Failure message if the request was rejected by
         #  policy, instead of from an authentication failure.
         #
+        perl
         eap
 
         #

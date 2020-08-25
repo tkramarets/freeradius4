@@ -245,7 +245,7 @@ server radsec {
 			#
 			#  Require a client certificate.
 			#
-			require_client_cert = yes
+			require_client_cert = no
 
 			#
 			#  As of version 2.1.10, client certificates can be

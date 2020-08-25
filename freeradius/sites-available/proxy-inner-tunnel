@@ -28,6 +28,11 @@ recv Access-Request {
 	}
 }
 
+authenticate imap { 
+	imap
+
+}
+
 authenticate eap {
 	#
 	#  This is necessary so that the inner tunnel EAP-MSCHAPv2

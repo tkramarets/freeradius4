@@ -151,7 +151,7 @@ recv Access-Request {
 	#  This module should be listed last, so that the other modules
 	#  get a chance to set Auth-Type for themselves.
 	#
-	pap
+#	pap
 }
 
 
@@ -185,7 +185,7 @@ authenticate perl {
 	perl
 }
 
-authenticate imap { 
+authenticate imap {
 	imap
 }
 
