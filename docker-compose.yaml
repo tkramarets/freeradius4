@@ -2,7 +2,7 @@ version: '3.2'
 
 services:
   freeradius:
-    image: "final:latest"
+    image: "tarasnix/freeradius"
     ports:
       - "1812:1812/udp"
       - "1813:1813/udp"
@@ -18,7 +18,7 @@ services:
       - SMTP_SERVER=smtp.i.ua
       - SMTP_PORT=465
       - SMTP_USER=myradius@i.ua
-      - SMTP_PASS=testpassword
+      - SMTP_PASS=testpass
       - SMTP_ADMIN_EMAIL=tkramarets@gmail.com
       - SMTP_SENDER_EMAIL=myradius@i.ua
       - SMTP_SUBJECT=test
