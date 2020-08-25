@@ -80,9 +80,9 @@ my $transport = Email::Sender::Transport::SMTPS->new(
         my $radiusNasi = $RAD_REQUEST{'NAS-Identifier'};
 my $email = Email::Simple->create(
         header => [
-        To      => 'tkramarets@gmail.com',
-        From    => 'myradius@i.ua',
-        Subject => "hello from radius server",
+        To      => "$RAD_PERLCONF{'smtp'}->{'admin_email'}",
+        From    => "$RAD_PERLCONF{'smtp'}->{'sender_email'}",
+        Subject => "$RAD_PERLCONF{'smtp'}->{'subject'}",
 ],
         body => "Failed authentication from $radiusUser on $radiusNas ( $radiusNasi ) $radiusFail",
 );
