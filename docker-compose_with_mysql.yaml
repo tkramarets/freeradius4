@@ -25,9 +25,8 @@ services:
       - CACHE_TIME=5
       - IMAP_URI=smtps://smtp.gmail.com:587
       - IMAP_TIMEOUT=5s
-      #- RADIUS_KEY=testing123
-      #- RAD_CLIENTS=10.0.0.0/24
-      #- RAD_DEBUG=yes
+      - RAD_DEBUG=yes
+      - RAD_DEBUG_LEVEL=-X
     depends_on:
       - mysql
     links:
