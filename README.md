@@ -34,6 +34,10 @@ docker -f docker-compose_with_mysql.yaml up
 docker exec freeradius4_mysql_1 mysql -u {username} -p {password} {database name } < ./radius.sql
 
 
+to test working configuration : 
+radtest  user@example.com "Password" 10.0.0.2:1812 1812 testing123
+
+
 to stop the docker-compose:
 
 docker-compose down
