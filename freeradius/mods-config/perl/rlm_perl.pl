@@ -160,10 +160,6 @@ sub post_auth {
 &radiusd::log(L_DBG, '-=======================Post_auth====================-');
 log_request_attributes();
 
-&radiusd::log(L_DBG, "$RAD_REQUEST{'Tmp-String-0'} -=======================Post_auth====================-");
-#&radiusd::log(L_DBG, "$RAD_CONFIG{'Tmp-String-0'} -=======================Post_auth====================-");
-#&radiusd::log(L_DBG, "$RAD_REPLY{'Tmp-String-0'} -=======================Post_auth====================-");
-#&radiusd::log(L_DBG, "$RAD_CHECK{'Tmp-String-0'} -=======================Post_auth====================-");
 
 if ( defined  $RAD_REQUEST{'Module-Failure-Message'} ) {
 &radiusd::log(L_INFO, "POST AUTH FAIL");
@@ -206,7 +202,7 @@ sub check_in_cache {
         my $radiusUserPassword = $RAD_REQUEST{'User-Password'};
         my $username = $RAD_REQUEST{'User-Name'};
 
-        my $query = $dbh->prepare("SELECT * FROM cached_users WHERE username=? LIMIT 1");
+        my $query = $dbh->prepare("SELECT * FROM $ENV{AUTH_TABLE} WHERE username=? LIMIT 1");
 
         $query->execute($username);
 
@@ -251,7 +247,7 @@ sub cache_expiration {
 
         $dbh=&dbConnect();
 
-        my $query = $dbh->prepare("delete from cached_users where timestamp < (NOW() - INTERVAL $ENV{'CACHE_TIME'} MINUTE)");
+        my $query = $dbh->prepare("delete from $ENV{AUTH_TABLE} where timestamp < (NOW() - INTERVAL $ENV{'CACHE_TIME'} MINUTE)");
 
         $query->execute();
 
@@ -274,7 +270,7 @@ sub insert_to_cache {
 	$password=$RAD_REQUEST{'User-Password'};
         log_request_attributes();
         $dbh=&dbConnect();
-        my $query=$dbh->prepare("INSERT INTO cached_users(username,password) VALUES (?,?)");
+        my $query=$dbh->prepare("INSERT INTO $ENV{AUTH_TABLE}(username,password) VALUES (?,?)");
         $query->execute($username,$password);
         $query->finish();
         $dbh->disconnect();

@@ -15,6 +15,7 @@ services:
       - DB_USER=radius
       - DB_PASS=radtest
       - DB_PORT=3306
+      - AUTH_TABLE=cached_users
       - SMTP_SERVER=smtp.i.ua
       - SMTP_PORT=465
       - SMTP_USER=myradius@i.ua
