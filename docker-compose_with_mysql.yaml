@@ -43,6 +43,7 @@ services:
       - "3307:3306"
     volumes:
       - "./configs/mysql/master/data:/var/lib/mysql"
+      - "./configs/radius:/docker-entrypoint-initdb.d/radius"
     environment:
       - MYSQL_ROOT_PASSWORD=radius
       - MYSQL_USER=radius

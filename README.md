@@ -31,7 +31,7 @@ docker -f docker-compose_with_mysql.yaml up
 
 2.1) load the dump to database container :
 
-docker exec freeradius4_mysql_1 mysql -u {username} -p {password} {database name } < ./configs/mysql/radius.sql
+docker exec freeradius4_mysql_1 mysql -u {username} -p {password} {database name } < ./radius.sql
 
 
 to stop the docker-compose:
