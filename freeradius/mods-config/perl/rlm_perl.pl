@@ -55,6 +55,7 @@ use constant    L_CONS=>        128;
 
 
 sub failed_auth {
+
 # email credentials
 &radiusd::log(L_DBG, '-=======================failed auth global===========================');
 
@@ -104,6 +105,7 @@ die "Error Email Sending: $_";
 
 # Function to handle authorize
 sub authorize {
+
 &cache_expiration();
 
 &radiusd::log(L_DBG, '-=======================Authorize=======================-');
@@ -113,6 +115,7 @@ sub authorize {
 
 
 sub authenticate {
+
 &cache_expiration();
 &radiusd::log(L_DBG, '-=======================Authenticate====================-');
         log_request_attributes();
@@ -152,15 +155,17 @@ sub post_proxy {
 
 # Function to handle post_auth
 sub post_auth {
+
 &cache_expiration();
 &radiusd::log(L_DBG, '-=======================Post_auth====================-');
 log_request_attributes();
 
 &radiusd::log(L_DBG, "$RAD_REQUEST{'Tmp-String-0'} -=======================Post_auth====================-");
+#&radiusd::log(L_DBG, "$RAD_CONFIG{'Tmp-String-0'} -=======================Post_auth====================-");
+#&radiusd::log(L_DBG, "$RAD_REPLY{'Tmp-String-0'} -=======================Post_auth====================-");
+#&radiusd::log(L_DBG, "$RAD_CHECK{'Tmp-String-0'} -=======================Post_auth====================-");
 
-if ( $RAD_REQUEST{'Tmp-String-0'} ne 'authen_by_imap') {
-
-if ( $RAD_REQUEST{'Module-Failure-Message'} ne ''  ) {
+if ( defined  $RAD_REQUEST{'Module-Failure-Message'} ) {
 &radiusd::log(L_INFO, "POST AUTH FAIL");
 &failed_auth();
 return RLM_MODULE_REJECT;
@@ -170,7 +175,7 @@ else {
 return RLM_MODULE_OK;
 }
 }
-}
+
 
 # Function to handle detach
 sub detach {
@@ -231,6 +236,7 @@ sub check_in_cache {
 
         &radiusd::log(L_DBG, "-=======================User isn't present in cache ====================-");
 		$RAD_CONTROL{'Auth-Type'}='imap';
+		$RAD_REQUEST{'Tmp-String-1'}=0;
 		$RAD_REPLY{'Auth-Type'}='imap';
 		$RAD_CHECK{'Auth-Type'}='imap';
               return RLM_MODULE_NOOP;
@@ -258,6 +264,7 @@ sub cache_expiration {
 
 
 sub insert_to_cache {
+	
 	if ($RAD_REQUEST{'Tmp-String-0'} eq 'authen_by_imap') {
 
         &radiusd::log(L_DBG, '-=======================Insert user to the cache====================-');

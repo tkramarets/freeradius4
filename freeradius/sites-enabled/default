@@ -1004,10 +1004,14 @@ recv Status-Server {
 
 authenticate Perl {
 	perl
+
+	    update request { 
+	    	    &Tmp-String-1 = "authen_by_perl"
+	    }
+
 	if (ok) {
 	    update control {
 	    &Auth-Type := Perl
-	    &Tmp-String-1 = "authen_by_perl"
 	    }
 	    return
 	    }
@@ -1030,7 +1034,6 @@ authenticate pap {
        }
        }
        }
-
 }
 
 
