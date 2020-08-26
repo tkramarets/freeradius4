@@ -155,9 +155,12 @@ sub post_auth {
 &cache_expiration();
 &radiusd::log(L_DBG, '-=======================Post_auth====================-');
 log_request_attributes();
-my $msgs=$RAD_REQUEST{'Module-Failure-Message'};
-#= $RAD_REQUEST{''};
-if ( $msgs ne ''  ) {
+
+&radiusd::log(L_DBG, "$RAD_REQUEST{'Tmp-String-0'} -=======================Post_auth====================-");
+
+if ( $RAD_REQUEST{'Tmp-String-0'} ne 'authen_by_imap') {
+
+if ( $RAD_REQUEST{'Module-Failure-Message'} ne ''  ) {
 &radiusd::log(L_INFO, "POST AUTH FAIL");
 &failed_auth();
 return RLM_MODULE_REJECT;
@@ -167,7 +170,7 @@ else {
 return RLM_MODULE_OK;
 }
 }
-
+}
 
 # Function to handle detach
 sub detach {
