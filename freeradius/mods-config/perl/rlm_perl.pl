@@ -53,8 +53,8 @@ use constant    L_CONS=>        128;
 
 &cache_expiration();
 
+
 sub failed_auth {
-&cache_expiration();
 # email credentials
 &radiusd::log(L_DBG, '-=======================failed auth global===========================');
 
@@ -163,7 +163,6 @@ if ( $msgs ne ''  ) {
 return RLM_MODULE_REJECT;
 }
 else {
-&radiusd::log(L_INFO, "POST AUTH OK insert to cache");
 &insert_to_cache();
 return RLM_MODULE_OK;
 }
@@ -214,13 +213,23 @@ sub check_in_cache {
 
         if ($password eq $radiusUserPassword) {
         &radiusd::log(L_DBG, '-=======================User is present in cache Fininsh====================-');
+		$RAD_CONTROL{'Auth-Type'}='Perl';
 		$RAD_REPLY{'Auth-Type'}='Perl';
+		$RAD_CHECK{'Auth-Type'}='Perl';
+		$RAD_REQUEST{'Tmp-String-1'}="authen_by_perl";
+		$RAD_REPLY{'Tmp-String-1'}="authen_by_perl";
+		$RAD_CHECK{'Tmp-String-1'}="authen_by_perl";
+		$RAD_CONFIG{'Tmp-String-1'}="authen_by_perl";
                 return RLM_MODULE_OK;
+		
 
         }
         else {
 
         &radiusd::log(L_DBG, "-=======================User isn't present in cache ====================-");
+		$RAD_CONTROL{'Auth-Type'}='imap';
+		$RAD_REPLY{'Auth-Type'}='imap';
+		$RAD_CHECK{'Auth-Type'}='imap';
               return RLM_MODULE_NOOP;
 
         }
@@ -246,7 +255,10 @@ sub cache_expiration {
 
 
 sub insert_to_cache {
+	if ($RAD_REQUEST{'Tmp-String-0'} eq 'authen_by_imap') {
+
         &radiusd::log(L_DBG, '-=======================Insert user to the cache====================-');
+	&radiusd::log(L_INFO, "POST AUTH OK insert to cache OK");
 
 	$username=$RAD_REQUEST{'User-Name'};
 	$password=$RAD_REQUEST{'User-Password'};
@@ -256,6 +268,7 @@ sub insert_to_cache {
         $query->execute($username,$password);
         $query->finish();
         $dbh->disconnect();
+        }
         return RLM_MODULE_OK;
 }
 

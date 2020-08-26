@@ -165,7 +165,7 @@
 #	The terminal server sends "Framed-Protocol = PPP" for auto PPP.
 #
 
-DEFAULT Auth-Type = imap
+DEFAULT Auth-Type = perl
 
 DEFAULT	Framed-Protocol == PPP
 	Framed-Protocol = PPP,

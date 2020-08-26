@@ -1004,21 +1004,31 @@ recv Status-Server {
 
 authenticate Perl {
 	perl
-	if (ok || updated) {
+	if (ok) {
 	    update control {
-	    &Auth-Type = Accept
+	    &Auth-Type := Perl
+	    &Tmp-String-1 = "authen_by_perl"
 	    }
-	}
-
+	    return
+	    }
 }
 
 authenticate pap {
+	if (&Tmp-String-1 == 'authen_by_perl') {
+	return
+	}
+	else {
         imap
+        if (ok) {
+       update control {
+	       &Auth-Type:= pap
+       }
+       update request { 
+            &Tmp-String-0 = "authen_by_imap"
 
-#       if (noop) {
-#               ok
-#       }
-
+       }
+       }
+       }
 
 }
 
