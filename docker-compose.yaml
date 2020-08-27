@@ -19,7 +19,7 @@ services:
       - SMTP_SERVER=smtp.i.ua
       - SMTP_PORT=465
       - SMTP_USER=myradius@i.ua
-      - SMTP_PASS=testpass
+      - SMTP_PASS=Eleonora24
       - SMTP_ADMIN_EMAIL=tkramarets@gmail.com
       - SMTP_SENDER_EMAIL=myradius@i.ua
       - SMTP_SUBJECT=Failed_authentication_on_radius
@@ -28,6 +28,14 @@ services:
       - IMAP_TIMEOUT=5s
       - RAD_DEBUG=yes
       - RAD_DEBUG_LEVEL=-X
+      - CLIENTS_IPADDR=*
+      - CLIENTS_SECRET=testsecret
+      - CLIENTS_PROTO_VALUE=*
+      - CLIENTS_SHORTNAME=wifi
+      - CLIENTS_REQUIRE_MESSAGE_AUTHENTICATOR=no
+      - CLIENTS_IDLE_TIMEOUT=30
+      - CLIENTS_LIFETIME=0
+      - CLIENTS_MAX_CONNECTIONS=16
     restart: always
     networks:
       - backend

@@ -20,6 +20,14 @@ following arguments will be taken from docker-compose file:
    CACHE_TIME  <- cache time in MINUTES (integer) 
    IMAP_TIMEOUT <- IMAP timeout in seconds 
    IMAP_URI  <- IMAP_URI can be smtp/smtps, imap/imaps pop etc.
+   CLIENTS_IPADDR <- * for any ip addr or subnet going here 10.0.0.0/24 or single host 10.0.0.1
+   CLIENTS_SECRET <- clients secret goes here
+   CLIENTS_PROTO_VALUE <- by default it's *
+   CLIENTS_SHORTNAME <- clients shortname displayed in logs
+   CLIENTS_REQUIRE_MESSAGE_AUTHENTICATOR <- usually it's should be set to no but sometines to yes
+   CLIENTS_IDLE_TIMEOUT <- clients idle_timeout parameter by default it's 30
+   CLIENTS_LIFETIME <- clients lifetime by default 0 unlimited
+   CLIENTS_MAX_CONNECTIONS <- clients limit max_connections by default this count should be 16 seems you may need to increase that value
 
 2) if you run docker-compose.yaml ( used with external DB )
 

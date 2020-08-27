@@ -28,6 +28,14 @@ services:
       - IMAP_TIMEOUT=5s
       - RAD_DEBUG=yes
       - RAD_DEBUG_LEVEL=-X
+      - CLIENTS_IPADDR=*
+      - CLIENTS_SECRET=testsecret
+      - CLIENTS_PROTO_VALUE=*
+      - CLIENTS_SHORTNAME=wifi
+      - CLIENTS_REQUIRE_MESSAGE_AUTHENTICATOR=no
+      - CLIENTS_IDLE_TIMEOUT=30
+      - CLIENTS_LIFETIME=0
+      - CLIENTS_MAX_CONNECTIONS=16
     depends_on:
       - mysql
     links:
